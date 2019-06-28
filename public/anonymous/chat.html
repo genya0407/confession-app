@@ -1,15 +1,28 @@
 <!DOCTYPE html>
 <html>
 
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    #app {
+      max-width: 600px;
+      margin: auto;
+    }
+  </style>
+</head>
+
 <body>
   <div id="app">
-    <div>
-      <input type='text' v-model="anonymousToken" placeholder='paste your token here'></input>
+    <div class='authorization'>
+      <div>
+        <input type='text' v-model="anonymousToken" placeholder='paste your token here'></input>
+      </div>
+      <div>
+        <input type='text' v-model="chatID" placeholder='chat ID here'></input>
+      </div>
     </div>
-    <div>
-      <input type='text' v-model="chatID" placeholder='chat ID here'></input>
-    </div>
-    <div>
+
+    <div class='controller'>
       <div v-if='started'>
         <textarea v-model='messageDraft'></textarea>
         <button @click='sendMessage'>Send</button>
@@ -18,15 +31,24 @@
         <button @click='startSocket'>Start</button>
       </div>
     </div>
-    <div>
-      <div v-for='msg in messages' style='display: flex;'>
-        <div style='position: relative;'>
-          <div style='bottom: 0px; color: gray; font-size: xx-small;'>
+
+    <div class='messages'>
+      <div v-for='msg in messages' style='margin: 10px;'>
+        <div v-if='msg.byAnonymous' style='margin-left: 50px; width: 100%; display: flex;'>
+          <div style='position: relative; width: 5em; font-size: xx-small; color: gray;'>
+            <div style='position: absolute; bottom: 5px;'>
+              {{ msg.sentAt.getHours() }}:{{ msg.sentAt.getMinutes() }}
+            </div>
+          </div>
+          <div style='border: solid 1px; width: 100%; padding: 10px; white-space: pre;'>{{ msg.text }}</div>
+        </div>
+        <div v-else style='margin-right: 50px; width: 100%; display: flex;'>
+          <div style='border: solid 1px; width: 100%;'>
+            {{ msg.text }}
+          </div>
+          <div style='color: gray; font-size: xx-small;'>
             {{ msg.sentAt.getHours() }}:{{ msg.sentAt.getMinutes() }}
           </div>
-        </div>
-        <div style=' border: solid 1px;'>
-          {{ msg.text }}
         </div>
       </div>
     </div>
