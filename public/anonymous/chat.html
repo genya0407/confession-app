@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <div id="app">
+    <div>
+      <input type='text' v-model="anonymousToken" placeholder='paste your token here'></input>
+    </div>
+    <div>
+      <input type='text' v-model="chatID" placeholder='chat ID here'></input>
+    </div>
+    <div>
+      <div v-if='started'>
+        <textarea v-model='messageDraft'></textarea>
+        <button @click='sendMessage'>Send</button>
+      </div>
+      <div v-else>
+        <button @click='startSocket'>Start</button>
+      </div>
+    </div>
+    <div>
+      <div v-for='msg in messages' style='display: flex;'>
+        <div style='position: relative;'>
+          <div style='bottom: 0px; color: gray; font-size: xx-small;'>
+            {{ msg.sentAt.getHours() }}:{{ msg.sentAt.getMinutes() }}
+          </div>
+        </div>
+        <div style=' border: solid 1px;'>
+          {{ msg.text }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import Vue from ' https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.esm.browser.js';
+    const wsServerDomain = 'localhost:8080'
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        anonymousToken: localStorage.anonymousToken,
+        chatID: localStorage.chatID,
+        messages: [],
+        messageDraft: null, websocket: null,
+      },
+      computed: {
+        socketURL: function () {
+          return `ws://${wsServerDomain}/anonymous/connect/chat/${this.chatID}?access_token=${encodeURIComponent(this.anonymousToken)}`
+        },
+        started: function () { return this.websocket !== null },
+      },
+      methods: {
+        startSocket: function () {
+          localStorage.anonymousToken = this.anonymousToken
+          localStorage.chatID = this.chatID
+          this.websocket = new WebSocket(this.socketURL)
+          this.websocket.onmessage = (evt) => this.onMessageReceive(JSON.parse(evt.data))
+        },
+        sendMessage: function () {
+          this.websocket.send(JSON.stringify({ text: this.messageDraft }))
+        },
+        onMessageReceive: function (msg) {
+          this.messages.push({
+            messageID: msg.message_id,
+            text: msg.text,
+            byAnonymous: msg.by_anonymous,
+            sentAt: new Date(Date.parse(msg.sent_at)),
+          })
+        },
+      },
+    })
+  </script>
+</body>
+
+</html>
