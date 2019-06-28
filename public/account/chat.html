@@ -4,6 +4,10 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    body {
+      background-color: #F4F4F4;
+    }
+
     #app {
       max-width: 600px;
       margin: auto;
@@ -34,8 +38,11 @@
 
     <div class='messages'>
       <div v-for='msg in messages' style='margin: 10px;'>
-        <Left-Message v-if='msg.byAnonymous' :text='msg.text' :sent-at='msg.sentAt'></Left-Message>
-        <Right-Message v-else :text='msg.text' :sent-at='msg.sentAt'></Right-Message>
+        <Left-Message v-if='msg.byAnonymous' :text='msg.text' :sent-at='msg.sentAt' v-bind:sent-at='msg.sentAt'
+          img-src='https://4.bp.blogspot.com/-toaP1vMGZAM/UNbkIddJNqI/AAAAAAAAJTk/MeuaawYOaLw/s200/mark_question.png'>
+        </Left-Message>
+        <Right-Message v-else :text='msg.text' :sent-at='msg.sentAt' img-src=''>
+        </Right-Message>
       </div>
     </div>
   </div>

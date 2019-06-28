@@ -4,6 +4,10 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    body {
+      background-color: #F4F4F4;
+    }
+
     #app {
       max-width: 600px;
       margin: auto;
@@ -34,8 +38,11 @@
 
     <div class='messages'>
       <div v-for='msg in messages' style='margin: 10px;'>
-        <Right-Message v-if="msg.byAnonymous" v-bind:text='msg.text' v-bind:sent-at='msg.sentAt'></Right-Message>
-        <Left-Message v-else v-bind:text='msg.text' v-bind:sent-at='msg.sentAt'></Left-Message>
+        <Right-Message v-if="msg.byAnonymous" v-bind:text='msg.text' v-bind:sent-at='msg.sentAt' img-src=''>
+        </Right-Message>
+        <Left-Message v-else v-bind:text='msg.text' v-bind:sent-at='msg.sentAt'
+          img-src='https://1.bp.blogspot.com/-fv0PKULcS_g/V5ND3noPfdI/AAAAAAAA8fM/0vqkeF1n-6kUguj3IWff3hDOh5KwzmqBwCLcB/s400/computer_hacker_white1.png'>
+        </Left-Message>
       </div>
     </div>
   </div>
