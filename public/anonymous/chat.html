@@ -70,7 +70,7 @@
           fetch(`http://${wsServerDomain}/anonymous/account/${this.accountID}/chats`, {
             method: 'POST',
             body: JSON.stringify({
-              beginning_text: this.messageDraft
+              beginning_message_text: this.messageDraft
             })
           }).then(resp => resp.json())
             .then(json => {
