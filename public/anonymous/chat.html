@@ -17,24 +17,15 @@
 
 <body>
   <div id="app">
-    <div class='authorization'>
-      <div>
-        <input type='text' v-model="anonymousToken" placeholder='paste your token here'></input>
-      </div>
-      <div>
-        <input type='text' v-model="chatID" placeholder='chat ID here'></input>
-      </div>
-    </div>
-
     <div class='controller'>
-      <div v-if='started' style='display: flex; position: relative;'>
+      <div style='display: flex; position: relative;'>
         <textarea v-model='messageDraft' style='width: 300px; height: 30px; display: block; margin: 5px;'></textarea>
-        <button @click='sendMessage' style='margin-left: 20px; height: 30px;'>
+        <button v-if='started' @click='sendMessage' style='margin-left: 20px; height: 30px;'>
           Send
         </button>
-      </div>
-      <div v-else>
-        <button @click='startSocket'>Start</button>
+        <button v-else @click='startSocket' style='margin-left: 20px; height: 30px;'>
+          Start
+        </button>
       </div>
     </div>
 
@@ -62,23 +53,32 @@
     var app = new Vue({
       el: '#app',
       data: {
-        anonymousToken: localStorage.anonymousToken,
-        chatID: localStorage.chatID,
+        accountID: null,
+        anonymousToken: null,
+        chatID: null,
         messages: [],
-        messageDraft: null, websocket: null,
+        messageDraft: null,
+        websocket: null,
       },
       computed: {
-        socketURL: function () {
-          return `ws://${wsServerDomain}/anonymous/connect/chat/${this.chatID}?access_token=${encodeURIComponent(this.anonymousToken)}`
-        },
         started: function () { return this.websocket !== null },
       },
       methods: {
         startSocket: function () {
-          localStorage.anonymousToken = this.anonymousToken
-          localStorage.chatID = this.chatID
-          this.websocket = new WebSocket(this.socketURL)
-          this.websocket.onmessage = (evt) => this.onMessageReceive(JSON.parse(evt.data))
+          const urlParams = new URLSearchParams(window.location.search)
+          this.accountID = urlParams.get('account_id')
+          fetch(`http://${wsServerDomain}/anonymous/account/${this.accountID}/chats`, {
+            method: 'POST',
+            body: JSON.stringify({
+              beginning_text: this.messageDraft
+            })
+          }).then(resp => resp.json())
+            .then(json => {
+              this.chatID = json.chat_id
+              this.anonymousToken = json.session_token
+              this.websocket = new WebSocket(`ws://${wsServerDomain}/anonymous/connect/chat/${this.chatID}?access_token=${encodeURIComponent(this.anonymousToken)}`)
+              this.websocket.onmessage = (evt) => this.onMessageReceive(JSON.parse(evt.data))
+            })
         },
         sendMessage: function () {
           this.websocket.send(JSON.stringify({ text: this.messageDraft }))
