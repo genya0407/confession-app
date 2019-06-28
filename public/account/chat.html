@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    #app {
+      max-width: 600px;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class='authorization'>
+      <div>
+        <input type='text' v-model="accountToken" placeholder='paste your token here'></input>
+      </div>
+      <div>
+        <input type='text' v-model="chatID" placeholder='chat ID here'></input>
+      </div>
+    </div>
+
+    <div class='controller'>
+      <div v-if='started'>
+        <textarea v-model='messageDraft'></textarea>
+        <button @click='sendMessage'>Send</button>
+      </div>
+      <div v-else>
+        <button @click='startSocket'>Start</button>
+      </div>
+    </div>
+
+    <div class='messages'>
+      <div v-for='msg in messages' style='margin: 10px;'>
+        <Left-Message v-if='msg.byAnonymous' :text='msg.text' :sent-at='msg.sentAt'></Left-Message>
+        <Right-Message v-else :text='msg.text' :sent-at='msg.sentAt'></Right-Message>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.esm.browser.js';
+    import { LeftMessage, RightMessage } from '/message.js';
+
+    Vue.component('right-message', RightMessage)
+    Vue.component('left-message', LeftMessage)
+
+    const wsServerDomain = 'localhost:8080'
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        accountToken: localStorage.accountToken,
+        chatID: localStorage.chatID,
+        messages: [],
+        messageDraft: null, websocket: null,
+      },
+      computed: {
+        socketURL: function () {
+          return `ws://${wsServerDomain}/connect/chat/${this.chatID}?access_token=${encodeURIComponent(this.accountToken)}`
+        },
+        started: function () { return this.websocket !== null },
+      },
+      methods: {
+        startSocket: function () {
+          localStorage.accountToken = this.accountToken
+          localStorage.chatID = this.chatID
+          this.websocket = new WebSocket(this.socketURL)
+          this.websocket.onmessage = (evt) => this.onMessageReceive(JSON.parse(evt.data))
+        },
+        sendMessage: function () {
+          this.websocket.send(JSON.stringify({ text: this.messageDraft }))
+        },
+        onMessageReceive: function (msg) {
+          this.messages.push({
+            messageID: msg.message_id,
+            text: msg.text,
+            byAnonymous: msg.by_anonymous,
+            sentAt: new Date(Date.parse(msg.sent_at)),
+          })
+        },
+      },
+    })
+  </script>
+</body>
+
+</html>

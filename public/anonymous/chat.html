@@ -34,28 +34,19 @@
 
     <div class='messages'>
       <div v-for='msg in messages' style='margin: 10px;'>
-        <div v-if='msg.byAnonymous' style='margin-left: 50px; width: 100%; display: flex;'>
-          <div style='position: relative; width: 5em; font-size: xx-small; color: gray;'>
-            <div style='position: absolute; bottom: 5px;'>
-              {{ msg.sentAt.getHours() }}:{{ msg.sentAt.getMinutes() }}
-            </div>
-          </div>
-          <div style='border: solid 1px; width: 100%; padding: 10px; white-space: pre;'>{{ msg.text }}</div>
-        </div>
-        <div v-else style='margin-right: 50px; width: 100%; display: flex;'>
-          <div style='border: solid 1px; width: 100%;'>
-            {{ msg.text }}
-          </div>
-          <div style='color: gray; font-size: xx-small;'>
-            {{ msg.sentAt.getHours() }}:{{ msg.sentAt.getMinutes() }}
-          </div>
-        </div>
+        <Right-Message v-if="msg.byAnonymous" v-bind:text='msg.text' v-bind:sent-at='msg.sentAt'></Right-Message>
+        <Left-Message v-else v-bind:text='msg.text' v-bind:sent-at='msg.sentAt'></Left-Message>
       </div>
     </div>
   </div>
 
   <script type="module">
     import Vue from ' https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.esm.browser.js';
+    import { LeftMessage, RightMessage } from '/message.js';
+
+    Vue.component('right-message', RightMessage)
+    Vue.component('left-message', LeftMessage)
+
     const wsServerDomain = 'localhost:8080'
 
     var app = new Vue({
