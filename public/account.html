@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #F4F4F4;
+    }
+
+    #app {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .account {
+      width: 300px;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div class="account">
+      <p>
+        {{account.name}}(@{{account.screenName}})
+      </p>
+      <div style='width: 100%;'>
+        <img :src='account.imgSrc' style='width: 100%; height: auto;'>
+      </div>
+      <button @click='startChat'>Start chat</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.esm.browser.js';
+
+    const serverDomain = 'localhost:8080'
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        account: {
+          accountID: "",
+          name: "",
+          screenName: "",
+          imgSrc: "",
+        },
+      },
+      mounted: function () {
+        const urlParams = new URLSearchParams(window.location.search)
+        const accountID = urlParams.get('account_id')
+        fetch(`http://${serverDomain}/account/${accountID}`)
+          .then(response => response.json())
+          .then(json => {
+            this.account.accountID = json.account_id
+            this.account.name = json.name
+            this.account.screenName = json.screen_name
+            this.account.imgSrc = json.image_url
+          })
+      },
+      methods: {
+        startChat: function () {
+          window.location.href = `http://${location.hostname}:${location.port}/anonymous/chat.html`
+        },
+      },
+    })
+  </script>
+</body>
+
+</html>

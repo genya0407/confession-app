@@ -17,15 +17,6 @@
 
 <body>
   <div id="app">
-    <div class='authorization'>
-      <div>
-        <input type='text' v-model="accountToken" placeholder='paste your token here'></input>
-      </div>
-      <div>
-        <input type='text' v-model="chatID" placeholder='chat ID here'></input>
-      </div>
-    </div>
-
     <div class='controller'>
       <div v-if='started' style='display: flex; position: relative;'>
         <textarea v-model='messageDraft' style='width: 300px; height: 30px; display: block; margin: 5px;'></textarea>
@@ -63,7 +54,7 @@
       el: '#app',
       data: {
         accountToken: localStorage.accountToken,
-        chatID: localStorage.chatID,
+        chatID: null,
         messages: [],
         messageDraft: null, websocket: null,
       },
@@ -73,10 +64,15 @@
         },
         started: function () { return this.websocket !== null },
       },
+      mounted: function () {
+        this.$nextTick(function () {
+          const urlParams = new URLSearchParams(window.location.search)
+          this.chatID = urlParams.get('chat_id')
+          this.startSocket()
+        })
+      },
       methods: {
         startSocket: function () {
-          localStorage.accountToken = this.accountToken
-          localStorage.chatID = this.chatID
           this.websocket = new WebSocket(this.socketURL)
           this.websocket.onmessage = (evt) => this.onMessageReceive(JSON.parse(evt.data))
         },

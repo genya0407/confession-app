@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      background-color: #F4F4F4;
+    }
+
+    #app {
+      max-width: 600px;
+      margin: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <input v-model='accountToken'><button @click='login'>Login</button>
+  </div>
+
+  <script type="module">
+    import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.esm.browser.js';
+
+    var app = new Vue({
+      el: '#app',
+      data: {
+        accountToken: localStorage.accountToken,
+      },
+      methods: {
+        login: function () {
+          localStorage.accountToken = this.accountToken
+          window.location.href = `http://${location.hostname}:${location.port}/account/chat_list.html`
+        },
+      },
+    })
+  </script>
+</body>
+
+</html>
